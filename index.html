@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestion Familiale – 4 membres</title>
+  <style>
+    :root {
+      --bg: #0f172a;         /* slate-900 */
+      --card: #111827;       /* gray-900 */
+      --muted: #94a3b8;      /* slate-400 */
+      --text: #e5e7eb;       /* gray-200 */
+      --accent: #22d3ee;     /* cyan-400 */
+      --accent-2: #34d399;   /* emerald-400 */
+      --danger: #f43f5e;     /* rose-500 */
+      --warning: #f59e0b;    /* amber-500 */
+      --border: #1f2937;     /* gray-800 */
+      --chip: #0b1220;       /* slightly darker */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 80% -10%, #172554 0%, transparent 60%),
+                  radial-gradient(1000px 500px at -10% 10%, #164e63 0%, transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    header {
+      padding: 28px 18px 10px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .title-wrap { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 26px; letter-spacing: .3px; }
+    .sub { color: var(--muted); font-size: 14px; }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    button, select, input, textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .05s ease, border-color .2s ease, box-shadow .2s ease;
+      box-shadow: 0 1px 0 rgba(255,255,255, .06) inset, 0 6px 20px rgba(0,0,0,.25);
+    }
+    .btn:hover { border-color: #2d3b4f; }
+    .btn:active { transform: translateY(1px); }
+    .btn-accent { border-color: rgba(34,211,238,.6); box-shadow: 0 0 0 1px rgba(34,211,238,.3) inset, var(--shadow); }
+    .btn-danger { border-color: rgba(244,63,94,.6); box-shadow: 0 0 0 1px rgba(244,63,94,.3) inset, var(--shadow); }
+
+    .container {
+      padding: 10px 18px 40px;
+      max-width: 1300px; margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      gap: 18px;
+    }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, minmax(250px, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column; min-height: 380px;
+    }
+
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .name { font-weight: 700; font-size: 18px; letter-spacing: .3px; }
+    .rename {
+      background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px;
+    }
+    .rename:hover { background: rgba(255,255,255,.06); color: var(--text); }
+
+    .balance {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: var(--chip);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .balance .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; }
+    .balance .amount { font-size: 20px; font-weight: 700; }
+
+    .btn-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 12px;
+    }
+
+    .btn-chip {
+      padding: 10px 10px; border-radius: 12px; border: 1px solid var(--border); background: #0b1220; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; justify-content: center; text-align: center; font-size: 14px;
+    }
+    .btn-chip:hover { border-color: #2d3b4f; }
+    .chip-green { box-shadow: 0 0 0 1px rgba(52, 211, 153, .35) inset; }
+    .chip-yellow { box-shadow: 0 0 0 1px rgba(245, 158, 11, .35) inset; }
+    .chip-cyan { box-shadow: 0 0 0 1px rgba(34, 211, 238, .35) inset; }
+
+    .history { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; }
+    .history h3 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .6px; text-transform: uppercase; }
+    .items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; overflow: auto; }
+    .item { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: baseline; border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px; background: rgba(255,255,255,.02); }
+    .item .sign { font-weight: 700; }
+    .item .desc { color: var(--muted); font-size: 13px; }
+    .item .date { color: var(--muted); font-size: 12px; }
+    .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 16px; border: 1px dashed var(--border); border-radius: 12px; }
+
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; background: #0b1220; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--border); }
+
+    /* Dialog */
+    dialog {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 16px; padding: 0; box-shadow: var(--shadow);
+      width: min(520px, 92vw);
+    }
+    dialog::backdrop { backdrop-filter: blur(4px); background: rgba(0,0,0,.4); }
+    .dlg-head { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .dlg-body { padding: 16px; display: grid; gap: 12px; }
+    .dlg-actions { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+    .x { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 8px; border-radius: 8px; }
+    .x:hover { background: rgba(255,255,255,.06); color: var(--text); }
+
+    label { font-size: 13px; color: var(--muted); }
+    input[type="number"], input[type="text"], select, textarea {
+      padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: #0b1220; outline: none; width: 100%;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+
+    .form-row { display: grid; gap: 6px; }
+    .form-two { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    .form-err { color: var(--danger); font-size: 13px; display: none; }
+
+    footer { margin-top: 26px; text-align: center; color: var(--muted); font-size: 12px; }
+    .sep { opacity: .6; margin: 0 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-wrap">
+      <h1>Gestion Familiale</h1>
+      <span class="sub">4 membres · suivi des revenus, dépenses & transferts</span>
+    </div>
+    <div class="actions">
+      <button class="btn" id="resetBtn" title="Tout remettre à zéro">Réinitialiser</button>
+      <button class="btn btn-accent" id="exportBtn" title="Exporter les données en JSON">Exporter</button>
+      <label class="btn" for="importInput" title="Importer des données JSON">Importer<input id="importInput" type="file" accept="application/json" hidden></label>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="grid" id="grid"><!-- cards injected by JS --></div>
+    <footer>
+      <span>Dev. client ; données stockées localement (<span class="kbd">localStorage</span>).</span>
+      <span class="sep">•</span>
+      <span>Devise : <span id="currencyLabel">TND</span> · décimales : 3</span>
+    </footer>
+  </div>
+
+  <!-- Dialog: revenu / dépense -->
+  <dialog id="txDialog">
+    <form method="dialog" id="txForm">
+      <div class="dlg-head">
+        <div>
+          <strong id="txTitle">Nouvelle transaction</strong>
+          <div class="sub" id="txSubtitle"></div>
+        </div>
+        <button class="x" value="cancel" aria-label="Fermer">✕</button>
+      </div>
+      <div class="dlg-body">
+        <input type="hidden" id="txMemberId">
+        <input type="hidden" id="txType">
+        <div class="form-two">
+          <div class="form-row">
+            <label for="txAmount">Montant</label>
+            <input id="txAmount" type="number" step="0.001" min="0" placeholder="0.000" required>
+          </div>
+          <div class="form-row">
+            <label for="txDate">Date & heure</label>
+            <input id="txDate" type="datetime-local" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="txDesc">Description</label>
+          <textarea id="txDesc" placeholder="Exemples : Salaire, courses, facture, etc."></textarea>
+        </div>
+        <div class="form-err" id="txErr"></div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn" value="cancel">Annuler</button>
+        <button class="btn btn-accent" id="txSubmit" value="default">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Dialog: transfert -->
+  <dialog id="trDialog">
+    <form method="dialog" id="trForm">
+      <div class="dlg-head">
+        <div>
+          <strong>Transférer à un autre membre</strong>
+          <div class="sub" id="trSubtitle"></div>
+        </div>
+        <button class="x" value="cancel" aria-label="Fermer">✕</button>
+      </div>
+      <div class="dlg-body">
+        <input type="hidden" id="trFromId">
+        <div class="form-two">
+          <div class="form-row">
+            <label for="trToId">Destinataire</label>
+            <select id="trToId"></select>
+          </div>
+          <div class="form-row">
+            <label for="trAmount">Montant</label>
+            <input id="trAmount" type="number" step="0.001" min="0" placeholder="0.000" required>
+          </div>
+        </div>
+        <div class="form-two">
+          <div class="form-row">
+            <label for="trDate">Date & heure</label>
+            <input id="trDate" type="datetime-local" required>
+          </div>
+          <div class="form-row">
+            <label for="trDesc">Description</label>
+            <input id="trDesc" type="text" placeholder="Exemples : argent de poche, remboursement…">
+          </div>
+        </div>
+        <div class="form-err" id="trErr"></div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn" value="cancel">Annuler</button>
+        <button class="btn btn-accent" id="trSubmit" value="default">Transférer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // =====================
+    // State & persistence
+    // =====================
+    const STORAGE_KEY = 'family_finance_v1';
+    const CURRENCY = 'TND'; // Tunisie · 3 décimales
+    const DECIMALS = 3;
+
+    const DEFAULT_MEMBERS = [
+      { id: 'm1', name: 'Membre 1', balance: 0, history: [] },
+      { id: 'm2', name: 'Membre 2', balance: 0, history: [] },
+      { id: 'm3', name: 'Membre 3', balance: 0, history: [] },
+      { id: 'm4', name: 'Membre 4', balance: 0, history: [] },
+    ];
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { members: structuredClone(DEFAULT_MEMBERS) };
+        const parsed = JSON.parse(raw);
+        // Basic validation
+        if (!parsed.members || !Array.isArray(parsed.members)) throw new Error('corrupt');
+        // Ensure fields exist
+        parsed.members.forEach(m => {
+          m.balance = Number(m.balance || 0);
+          m.history = Array.isArray(m.history) ? m.history : [];
+        });
+        return parsed;
+      } catch (e) {
+        console.warn('Ré-initialisation des données (corruption détectée)');
+        return { members: structuredClone(DEFAULT_MEMBERS) };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // =====================
+    // Helpers
+    // =====================
+    const fmt = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: DECIMALS, maximumFractionDigits: DECIMALS });
+    const fmtDate = new Intl.DateTimeFormat('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+    function money(n) { return `${fmt.format(n)}\u00A0${CURRENCY}`; }
+    function nowLocalDatetimeValue() {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0,16);
+    }
+
+    function byId(id){ return document.getElementById(id); }
+    function getMember(id){ return state.members.find(m => m.id === id); }
+
+    // =====================
+    // Rendering
+    // =====================
+    const grid = document.getElementById('grid');
+
+    function render() {
+      grid.innerHTML = '';
+      state.members.forEach(m => {
+        const el = document.createElement('section');
+        el.className = 'card';
+        el.dataset.id = m.id;
+        el.innerHTML = `
+          <div class="card-head">
+            <div class="name" title="Cliquez pour renommer">${escapeHtml(m.name)}</div>
+            <button class="rename" title="Renommer">✏️</button>
+          </div>
+          <div class="balance" title="Solde actuel">
+            <div class="label">Solde</div>
+            <div class="amount">${money(m.balance)}</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-chip chip-green" data-action="income">➕ Revenu</button>
+            <button class="btn-chip chip-yellow" data-action="expense">➖ Dépense</button>
+            <button class="btn-chip chip-cyan" data-action="transfer">↔ Donner</button>
+          </div>
+          <div class="history">
+            <h3>Historique</h3>
+            ${m.history.length === 0 ? `<div class="empty">Aucune transaction pour l'instant.</div>` : `<ul class="items">${m.history.slice().reverse().map(itemTpl).join('')}</ul>`}
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+      document.getElementById('currencyLabel').textContent = CURRENCY;
+    }
+
+    function itemTpl(t) {
+      const sign = t.type === 'income' || t.type === 'transfer_in' ? '+' : '−';
+      const color = t.type === 'income' || t.type === 'transfer_in' ? 'style="color: var(--accent-2)"' : 'style="color: var(--danger)"';
+      let what = '';
+      if (t.type === 'income') what = 'Revenu';
+      if (t.type === 'expense') what = 'Dépense';
+      if (t.type === 'transfer_out') what = `Transfert → ${escapeHtml(t.counterName || '')}`;
+      if (t.type === 'transfer_in') what = `Transfert ← ${escapeHtml(t.counterName || '')}`;
+      const when = new Date(t.date);
+      return `
+        <li class="item">
+          <div class="sign" ${color}>${sign}</div>
+          <div>
+            <div><strong>${what}</strong> · <span class="desc">${escapeHtml(t.desc || '')}</span></div>
+            <div class="date">${fmtDate.format(when)}</div>
+          </div>
+          <div><strong>${money(t.amount)}</strong></div>
+        </li>`;
+    }
+
+    // =====================
+    // Card interactions
+    // =====================
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const card = e.target.closest('.card');
+      if (!card) return;
+      const id = card.dataset.id;
+
+      if (btn.classList.contains('rename')) {
+        renameMember(id);
+        return;
+      }
+
+      const action = btn.dataset.action;
+      if (action === 'income') openTxDialog(id, 'income');
+      if (action === 'expense') openTxDialog(id, 'expense');
+      if (action === 'transfer') openTransferDialog(id);
+    });
+
+    function renameMember(id) {
+      const m = getMember(id);
+      const newName = prompt('Nouveau nom pour ce membre :', m.name);
+      if (!newName) return;
+      m.name = newName.trim().slice(0, 40) || m.name;
+      saveState();
+      render();
+    }
+
+    // =====================
+    // Revenu / Dépense dialog
+    // =====================
+    const txDialog = byId('txDialog');
+    const txTitle = byId('txTitle');
+    const txSubtitle = byId('txSubtitle');
+    const txMemberId = byId('txMemberId');
+    const txType = byId('txType');
+    const txAmount = byId('txAmount');
+    const txDate = byId('txDate');
+    const txDesc = byId('txDesc');
+    const txErr = byId('txErr');
+
+    function openTxDialog(memberId, type) {
+      const m = getMember(memberId);
+      txMemberId.value = m.id;
+      txType.value = type;
+      txTitle.textContent = type === 'income' ? 'Ajouter un revenu' : 'Ajouter une dépense';
+      txSubtitle.textContent = m.name;
+      txAmount.value = '';
+      txDate.value = nowLocalDatetimeValue();
+      txDesc.value = '';
+      txErr.style.display = 'none';
+      txErr.textContent = '';
+      txDialog.showModal();
+      setTimeout(() => txAmount.focus(), 0);
+    }
+
+    byId('txForm').addEventListener('close', () => {
+      // no-op; keep for future hooks
+    });
+
+    byId('txSubmit').addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = txMemberId.value;
+      const type = txType.value;
+      const amount = Number(txAmount.value);
+      const date = txDate.value ? new Date(txDate.value) : new Date();
+      const desc = txDesc.value.trim();
+
+      if (!Number.isFinite(amount) || amount <= 0) return showTxError('Veuillez saisir un montant valide.');
+      const m = getMember(id);
+      if (type === 'expense' && amount > m.balance) {
+        return showTxError("Le montant dépasse le solde disponible.");
+      }
+
+      applyTransaction(m, { type, amount, date: date.toISOString(), desc });
+      saveState();
+      render();
+      txDialog.close();
+    });
+
+    function showTxError(msg){ txErr.textContent = msg; txErr.style.display = 'block'; }
+
+    function applyTransaction(member, t) {
+      const entry = { ...t };
+      if (t.type === 'income') member.balance = round(member.balance + t.amount);
+      if (t.type === 'expense') member.balance = round(member.balance - t.amount);
+      member.history.push(entry);
+    }
+
+    // =====================
+    // Transfert dialog
+    // =====================
+    const trDialog = byId('trDialog');
+    const trFromId = byId('trFromId');
+    const trToId = byId('trToId');
+    const trAmount = byId('trAmount');
+    const trDate = byId('trDate');
+    const trDesc = byId('trDesc');
+    const trErr = byId('trErr');
+    const trSubtitle = byId('trSubtitle');
+
+    function openTransferDialog(fromId) {
+      const from = getMember(fromId);
+      trFromId.value = from.id;
+      trSubtitle.textContent = `Depuis : ${from.name}`;
+
+      // Populate recipients
+      trToId.innerHTML = '';
+      state.members.forEach(m => {
+        if (m.id === from.id) return;
+        const opt = document.createElement('option');
+        opt.value = m.id; opt.textContent = m.name;
+        trToId.appendChild(opt);
+      });
+
+      trAmount.value = '';
+      trDate.value = nowLocalDatetimeValue();
+      trDesc.value = '';
+      trErr.style.display = 'none';
+      trErr.textContent = '';
+      trDialog.showModal();
+      setTimeout(() => trAmount.focus(), 0);
+    }
+
+    byId('trSubmit').addEventListener('click', (e) => {
+      e.preventDefault();
+      const from = getMember(trFromId.value);
+      const to = getMember(trToId.value);
+      if (!to) return showTrError('Choisissez un destinataire.');
+      const amount = Number(trAmount.value);
+      const date = trDate.value ? new Date(trDate.value) : new Date();
+      const desc = trDesc.value.trim();
+
+      if (!Number.isFinite(amount) || amount <= 0) return showTrError('Veuillez saisir un montant valide.');
+      if (amount > from.balance) return showTrError('Le montant dépasse le solde du membre source.');
+
+      // Apply transfer: out from source, in to target
+      from.balance = round(from.balance - amount);
+      to.balance = round(to.balance + amount);
+      from.history.push({ type: 'transfer_out', amount, date: date.toISOString(), desc, counterId: to.id, counterName: to.name });
+      to.history.push({ type: 'transfer_in', amount, date: date.toISOString(), desc, counterId: from.id, counterName: from.name });
+
+      saveState();
+      render();
+      trDialog.close();
+    });
+
+    function showTrError(msg){ trErr.textContent = msg; trErr.style.display = 'block'; }
+
+    // =====================
+    // Global actions: Export / Import / Reset
+    // =====================
+    byId('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `gestion-familiale-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    byId('importInput').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const incoming = JSON.parse(text);
+        if (!incoming || !incoming.members || !Array.isArray(incoming.members)) throw new Error('format');
+        // basic sanitize
+        incoming.members = incoming.members.slice(0,4).map((m, i) => ({
+          id: ['m1','m2','m3','m4'][i],
+          name: String(m.name || `Membre ${i+1}`).slice(0,40),
+          balance: Number(m.balance)||0,
+          history: Array.isArray(m.history) ? m.history.filter(h => Number(h.amount)>0 && h.date) : []
+        }));
+        state = incoming;
+        saveState();
+        render();
+        e.target.value = '';
+      } catch(err) {
+        alert("Fichier invalide. Impossible d'importer.");
+      }
+    });
+
+    byId('resetBtn').addEventListener('click', () => {
+      if (!confirm('Tout réinitialiser ? Cette action supprimera les données locales.')) return;
+      state = { members: structuredClone(DEFAULT_MEMBERS) };
+      saveState();
+      render();
+    });
+
+    // =====================
+    // Utilities
+    // =====================
+    function round(n){ return Number(n.toFixed(DECIMALS)); }
+    function escapeHtml(s){
+      return String(s || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
